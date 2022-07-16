@@ -1,0 +1,248 @@
+stages:
+  - build
+  - deploy
+
+dev-build:
+  stage: build
+  image: node:15.2.0
+  only:
+    - master
+  before_script:
+    - unset CI
+    - yarn config set cache-folder .yarn
+    - yarn install
+  script:
+    - yarn build:dev
+    - ls
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dev-build
+  tags:
+    - docker
+
+dev-deploy:
+  stage: deploy
+  image: ubuntu:latest
+  only:
+    - master
+  environment:
+    name: dev
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo "$SSH_HOST" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ls dev-build
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION && cd $DEPLOY_LOCATION && find . \! -name '.htaccess' -delete"
+    - scp -r dev-build/* $SSH_USERNAME@$SSH_HOST:$DEPLOY_LOCATION
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION"
+
+prod-kh-build:
+  stage: build
+  image: node:15.2.0
+  only:
+    - master
+  before_script:
+    - unset CI
+    - yarn config set cache-folder .yarn
+    - yarn install
+  script:
+    - yarn build:prod-kh
+    - ls
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - prod-kh-build
+  tags:
+    - docker
+
+prod-kh-deploy:
+  stage: deploy
+  image: ubuntu:latest
+  only:
+    - master
+  environment:
+    name: prod-kh
+  when: manual
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo "$SSH_HOST" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ls prod-kh-build
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION && cd $DEPLOY_LOCATION && find . \! -name '.htaccess' -delete"
+    - scp -r prod-kh-build/* $SSH_USERNAME@$SSH_HOST:$DEPLOY_LOCATION
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION"
+
+prod-wp-build:
+  stage: build
+  image: node:15.2.0
+  only:
+    - master
+  before_script:
+    - unset CI
+    - yarn config set cache-folder .yarn
+    - yarn install
+  script:
+    - yarn build:prod-wp
+    - ls
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - prod-wp-build
+  tags:
+    - docker
+
+prod-wp-deploy:
+  stage: deploy
+  image: ubuntu:latest
+  only:
+    - master
+  environment:
+    name: prod-wp
+  when: manual
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo "$SSH_HOST" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ls prod-wp-build
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION && cd $DEPLOY_LOCATION && find . \! -name '.htaccess' -delete"
+    - scp -r prod-wp-build/* $SSH_USERNAME@$SSH_HOST:$DEPLOY_LOCATION
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION"
+
+prod-mystage-build:
+  stage: build
+  image: node:15.2.0
+  only:
+    - master
+  before_script:
+    - unset CI
+    - yarn config set cache-folder .yarn
+    - yarn install
+  script:
+    - yarn build:prod-mystage
+    - ls
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - prod-mystage-build
+  tags:
+    - docker
+
+prod-mystage-deploy:
+  stage: deploy
+  image: ubuntu:latest
+  only:
+    - master
+  environment:
+    name: prod-mystage
+  when: manual
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo "$SSH_HOST" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ls prod-mystage-build
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION && cd $DEPLOY_LOCATION && find . \! -name '.htaccess' -delete"
+    - scp -r prod-mystage-build/* $SSH_USERNAME@$SSH_HOST:$DEPLOY_LOCATION
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION"
+
+prod-cb-build:
+  stage: build
+  image: node:15.2.0
+  only:
+    - master
+  before_script:
+    - unset CI
+    - yarn config set cache-folder .yarn
+    - yarn install
+  script:
+    - yarn build:prod-cb
+    - ls
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - prod-cb-build
+  tags:
+    - docker
+
+prod-cb-deploy:
+  stage: deploy
+  image: ubuntu:latest
+  only:
+    - master
+  environment:
+    name: prod-cb
+  when: manual
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo "$SSH_HOST" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ls prod-cb-build
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION && cd $DEPLOY_LOCATION && find . \! -name '.htaccess' -delete"
+    - scp -r prod-cb-build/* $SSH_USERNAME@$SSH_HOST:$DEPLOY_LOCATION
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION"
+
+prod-mf-build:
+  stage: build
+  image: node:15.2.0
+  only:
+    - master
+  before_script:
+    - unset CI
+    - yarn config set cache-folder .yarn
+    - yarn install
+  script:
+    - yarn build:prod-mf
+    - ls
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - prod-mf-build
+  tags:
+    - docker
+
+prod-mf-deploy:
+  stage: deploy
+  image: ubuntu:latest
+  only:
+    - master
+  environment:
+    name: prod-mf
+  when: manual
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo "$SSH_HOST" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ls prod-mf-build
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION && cd $DEPLOY_LOCATION && find . \! -name '.htaccess' -delete"
+    - scp -r prod-mf-build/* $SSH_USERNAME@$SSH_HOST:$DEPLOY_LOCATION
+    - ssh $SSH_USERNAME@$SSH_HOST "ls $DEPLOY_LOCATION"
